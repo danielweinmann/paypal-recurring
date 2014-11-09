@@ -94,6 +94,14 @@ module PayPal
       CA_FILE = File.dirname(__FILE__) + "/cacert.pem"
 
       attr_accessor :uri
+      attr_accessor :sandbox
+      attr_accessor :username
+      attr_accessor :password
+      attr_accessor :signature
+
+      def initialize(options = {})
+        options.each {|name, value| send("#{name}=", value)}
+      end
 
       # Do a POST request to PayPal API.
       # The +method+ argument is the name of the API method you want to invoke.
@@ -135,10 +143,17 @@ module PayPal
         normalize_params default_params.merge(params)
       end
 
+      # Return a name for custom environment mode
+      #
+      def environment
+        return if self.sandbox.nil?
+        self.sandbox ? :sandbox : :production
+      end
+
       # Parse current API url.
       #
       def uri # :nodoc:
-        @uri ||= URI.parse(PayPal::Recurring.api_endpoint)
+        @uri ||= URI.parse(PayPal::Recurring.api_endpoint(self.environment))
       end
 
       def client
@@ -153,9 +168,9 @@ module PayPal
 
       def default_params
         {
-          :username    => PayPal::Recurring.username,
-          :password    => PayPal::Recurring.password,
-          :signature   => PayPal::Recurring.signature,
+          :username    => self.username  || PayPal::Recurring.username,
+          :password    => self.password  || PayPal::Recurring.password,
+          :signature   => self.signature || PayPal::Recurring.signature,
           :version     => PayPal::Recurring.api_version
         }
       end

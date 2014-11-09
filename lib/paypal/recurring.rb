@@ -85,14 +85,14 @@ module PayPal
 
     # Return URL endpoints for current environment.
     #
-    def self.endpoints
-      ENDPOINTS[environment]
+    def self.endpoints(custom_environment = nil)
+      ENDPOINTS[custom_environment || environment]
     end
 
     # Return API endpoint based on current environment.
     #
-    def self.api_endpoint
-      endpoints[:api]
+    def self.api_endpoint(custom_environment = nil)
+      endpoints(custom_environment)[:api]
     end
 
     # Return PayPal's API version.

@@ -31,6 +31,10 @@ module PayPal
       attr_accessor :trial_length
       attr_accessor :trial_period
       attr_accessor :trial_amount
+      attr_accessor :sandbox
+      attr_accessor :username
+      attr_accessor :password
+      attr_accessor :signature
 
       def initialize(options = {})
         options.each {|name, value| send("#{name}=", value)}
@@ -39,7 +43,18 @@ module PayPal
       # Just a shortcut convenience.
       #
       def request # :nodoc:
-        @request ||= Request.new
+        @request ||= Request.new(request_options)
+      end
+
+      # Sets options to send to Request.new so we can configure per request sandbox, username, password and signature.
+      #
+      def request_options # :nodoc:
+        {
+          :sandbox => self.sandbox,
+          :username => self.username,
+          :password => self.password,
+          :signature => self.signature
+        }
       end
 
       # Request a checkout token.

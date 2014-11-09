@@ -57,6 +57,42 @@ describe PayPal::Recurring::Request do
     end
   end
 
+  describe "#post with per request sandbox, username, password and signature" do
+    before :all do
+      VCR.eject_cassette
+      VCR.turn_off!
+    end
+
+    after :all do
+      VCR.turn_on!
+    end
+
+    subject { PayPal::Recurring.new(:sandbox => false, :username => 'custom_user', :password => 'custom_password', :signature => 'custom_signature').request }
+
+    let(:request) {
+      FakeWeb.register_uri :post, "https://api-3t.paypal.com/nvp", :status => 200
+      subject.run(:checkout)
+      CGI.parse(FakeWeb.last_request.body)
+    }
+
+    it "sets uri" do
+      subject.uri.host.should == "api-3t.paypal.com"
+    end
+
+    it "sets username" do
+      request["USER"].first.should == 'custom_user'
+    end
+
+    it "sets password" do
+      request["PWD"].first.should == 'custom_password'
+    end
+
+    it "sets signature" do
+      request["SIGNATURE"].first.should == 'custom_signature'
+    end
+
+  end
+
   describe "#normalize_params" do
     it "normalizes method" do
       subject.normalize_params(:method => "some method").should == {:METHOD => "some method"}
