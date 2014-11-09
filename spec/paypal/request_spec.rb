@@ -26,69 +26,62 @@ describe PayPal::Recurring::Request do
       VCR.turn_on!
     end
 
-    let(:request) {
-      FakeWeb.register_uri :post, "https://api-3t.sandbox.paypal.com/nvp", :status => 200
-      subject.run(:checkout)
-      CGI.parse(FakeWeb.last_request.body)
-    }
+    context "when without per request configuration" do
+      let(:request) {
+        FakeWeb.register_uri :post, "https://api-3t.sandbox.paypal.com/nvp", :status => 200
+        subject.run(:checkout)
+        CGI.parse(FakeWeb.last_request.body)
+      }
 
-    it "sets action" do
-      request["METHOD"].first.should == "SetExpressCheckout"
+      it "sets action" do
+        request["METHOD"].first.should == "SetExpressCheckout"
+      end
+
+      it "sets username" do
+        request["USER"].first.should == PayPal::Recurring.username
+      end
+
+      it "sets password" do
+        request["PWD"].first.should == PayPal::Recurring.password
+      end
+
+      it "sets signature" do
+        request["SIGNATURE"].first.should == PayPal::Recurring.signature
+      end
+
+      it "sets API version" do
+        request["VERSION"].first.should == PayPal::Recurring.api_version
+      end
+
+      it "sets user agent" do
+        FakeWeb.last_request["User-Agent"].should == "PayPal::Recurring/#{PayPal::Recurring::Version::STRING}"
+      end
     end
 
-    it "sets username" do
-      request["USER"].first.should == PayPal::Recurring.username
-    end
+    context "when with per request sandbox, username, password and signature" do
+      subject { PayPal::Recurring.new(:sandbox => false, :username => 'custom_user', :password => 'custom_password', :signature => 'custom_signature').request }
 
-    it "sets password" do
-      request["PWD"].first.should == PayPal::Recurring.password
-    end
+      let(:request) {
+        FakeWeb.register_uri :post, "https://api-3t.paypal.com/nvp", :status => 200
+        subject.run(:checkout)
+        CGI.parse(FakeWeb.last_request.body)
+      }
 
-    it "sets signature" do
-      request["SIGNATURE"].first.should == PayPal::Recurring.signature
-    end
+      it "sets uri" do
+        subject.uri.host.should == "api-3t.paypal.com"
+      end
 
-    it "sets API version" do
-      request["VERSION"].first.should == PayPal::Recurring.api_version
-    end
+      it "sets username" do
+        request["USER"].first.should == 'custom_user'
+      end
 
-    it "sets user agent" do
-      FakeWeb.last_request["User-Agent"].should == "PayPal::Recurring/#{PayPal::Recurring::Version::STRING}"
-    end
-  end
+      it "sets password" do
+        request["PWD"].first.should == 'custom_password'
+      end
 
-  describe "#post with per request sandbox, username, password and signature" do
-    before :all do
-      VCR.eject_cassette
-      VCR.turn_off!
-    end
-
-    after :all do
-      VCR.turn_on!
-    end
-
-    subject { PayPal::Recurring.new(:sandbox => false, :username => 'custom_user', :password => 'custom_password', :signature => 'custom_signature').request }
-
-    let(:request) {
-      FakeWeb.register_uri :post, "https://api-3t.paypal.com/nvp", :status => 200
-      subject.run(:checkout)
-      CGI.parse(FakeWeb.last_request.body)
-    }
-
-    it "sets uri" do
-      subject.uri.host.should == "api-3t.paypal.com"
-    end
-
-    it "sets username" do
-      request["USER"].first.should == 'custom_user'
-    end
-
-    it "sets password" do
-      request["PWD"].first.should == 'custom_password'
-    end
-
-    it "sets signature" do
-      request["SIGNATURE"].first.should == 'custom_signature'
+      it "sets signature" do
+        request["SIGNATURE"].first.should == 'custom_signature'
+      end
     end
 
   end

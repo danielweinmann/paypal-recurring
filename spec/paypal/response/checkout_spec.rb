@@ -19,7 +19,30 @@ describe PayPal::Recurring::Response::Checkout do
 
     its(:valid?) { should be_true }
     its(:errors) { should be_empty }
+
     its(:checkout_url) { should == "#{PayPal::Recurring.site_endpoint}?cmd=_express-checkout&token=EC-6K296451S2213041J&useraction=commit" }
+  end
+
+  context "when successful with per request sandbox configuration" do
+    use_vcr_cassette "checkout/success_per_request"
+
+    subject {
+      ppr = PayPal::Recurring.new({
+        :return_url         => "http://example.com/thank_you",
+        :cancel_url         => "http://example.com/canceled",
+        :ipn_url            => "http://example.com/paypal/ipn",
+        :description        => "Awesome - Monthly Subscription",
+        :amount             => "9.00",
+        :currency           => "USD",
+        :sandbox            => false
+      })
+      ppr.checkout
+    }
+
+    its(:valid?) { should be_true }
+    its(:errors) { should be_empty }
+
+    its(:checkout_url) { should == "#{PayPal::Recurring.site_endpoint(:production)}?cmd=_express-checkout&token=EC-6K296451S2213041J&useraction=commit" }
   end
 
   context "when failure" do
@@ -29,4 +52,5 @@ describe PayPal::Recurring::Response::Checkout do
     its(:valid?) { should be_false }
     its(:errors) { should have(3).items }
   end
+
 end

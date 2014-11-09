@@ -95,16 +95,17 @@ module PayPal
       endpoints(custom_environment)[:api]
     end
 
+    # Return site endpoint based on current environment.
+    #
+    def self.site_endpoint(custom_environment = nil)
+      endpoints(custom_environment)[:site]
+    end
+
     # Return PayPal's API version.
     #
     def self.api_version
       "72.0"
     end
 
-    # Return site endpoint based on current environment.
-    #
-    def self.site_endpoint
-      endpoints[:site]
-    end
   end
 end

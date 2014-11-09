@@ -20,9 +20,9 @@ module PayPal
         :refund         => "Refund"
       }
 
-      def self.process(method, response)
+      def self.process(method, response, sandbox = nil)
         response_class = PayPal::Recurring::Response.const_get(RESPONDERS[method])
-        response_class.new(response)
+        response_class.new(response, { :sandbox => sandbox })
       end
     end
   end

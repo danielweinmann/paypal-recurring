@@ -3,7 +3,7 @@ module PayPal
     module Response
       class Checkout < Base
         def checkout_url
-          "#{PayPal::Recurring.site_endpoint}?cmd=_express-checkout&token=#{token}&useraction=commit"
+          "#{PayPal::Recurring.site_endpoint(self.environment)}?cmd=_express-checkout&token=#{token}&useraction=commit"
         end
       end
     end

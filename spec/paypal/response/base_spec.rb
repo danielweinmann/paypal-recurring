@@ -16,4 +16,17 @@ describe PayPal::Recurring::Response do
       response.foo.should == "foo"
     end
   end
+
+  describe ".sandbox" do
+    it "initializes sandbox true" do
+      response = response_class.new(nil, sandbox: true)
+      response.sandbox.should == true
+    end
+
+    it "initializes sandbox false" do
+      response = response_class.new(nil, sandbox: false)
+      response.sandbox.should == false
+    end
+  end
+
 end

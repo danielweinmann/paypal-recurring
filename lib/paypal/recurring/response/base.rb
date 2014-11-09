@@ -5,6 +5,7 @@ module PayPal
         extend PayPal::Recurring::Utils
 
         attr_accessor :response
+        attr_accessor :sandbox
 
         mapping(
           :token           => :TOKEN,
@@ -15,8 +16,16 @@ module PayPal
           :requested_at    => :TIMESTAMP
         )
 
-        def initialize(response = nil)
+        def initialize(response = nil, options = {})
           @response = response
+          options.each {|name, value| send("#{name}=", value)}
+        end
+
+        # Return a name for custom environment mode
+        #
+        def environment
+          return if self.sandbox.nil?
+          self.sandbox ? :sandbox : :production
         end
 
         def params

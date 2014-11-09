@@ -119,7 +119,7 @@ module PayPal
       def run(method, params = {})
         params = prepare_params(params.merge(:method => METHODS.fetch(method, method.to_s)))
         response = post(params)
-        Response.process(method, response)
+        Response.process(method, response, self.sandbox)
       end
 
       #
